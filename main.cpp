@@ -1,10 +1,6 @@
 #include <algorithm>
-#include <numeric>
-#include <cstdint>
-#include <iostream>
-#include <vector>
 #include <stack>
-using namespace std;
+#include <vector>
 
 template <class Type>
 class AVLTree {
@@ -15,9 +11,9 @@ class AVLTree {
         int height = 0;
     };
 
-    Node* root = nullptr;
+    Node* root_ = nullptr;
 
-    bool contains(Node* node, const Type& key) const {
+    bool Contains(Node* node, const Type& key) const {
         if (node == nullptr) {
             return false;
         }
@@ -25,12 +21,12 @@ class AVLTree {
             return true;
         }
         if (key < node->key) {
-            return contains(node->left, key);
+            return Contains(node->left, key);
         }
-        return contains(node->right, key);
+        return Contains(node->right, key);
     }
 
-    int height(Node* const node) {
+    int Height(Node* const node) {
         if (node == nullptr) {
             return -1;
         }
@@ -38,7 +34,7 @@ class AVLTree {
     }
 
     int diff(Node* const node) {
-        return height(node->left) - height(node->right);
+        return Height(node->left) - Height(node->right);
     }
 
     void LeftRotate(Node*& node) {
@@ -46,8 +42,8 @@ class AVLTree {
         node = node->right;
         root_subtree->right = node->left;
         node->left = root_subtree;
-        node->left->height = std::max(height(node->left->left), height(node->left->right)) + 1;
-        node->height = std::max(height(node->left), height(node->right)) + 1;
+        node->left->height = std::max(Height(node->left->left), Height(node->left->right)) + 1;
+        node->height = std::max(Height(node->left), Height(node->right)) + 1;
     }
 
     void RightRotate(Node*& node) {
@@ -55,8 +51,8 @@ class AVLTree {
         node = node->left;
         root_subtree->left = node->right;
         node->right = root_subtree;
-        node->right->height = std::max(height(node->right->left), height(node->right->right)) + 1;
-        node->height = std::max(height(node->left), height(node->right)) + 1;
+        node->right->height = std::max(Height(node->right->left), Height(node->right->right)) + 1;
+        node->height = std::max(Height(node->left), Height(node->right)) + 1;
     }
 
     void insert(Node*& node, const Type& key) {
@@ -70,7 +66,7 @@ class AVLTree {
         }
         if (key < node->key) {
             insert(node->left, key);
-            node->height = std::max(height(node->left), height(node->right)) + 1;
+            node->height = std::max(Height(node->left), Height(node->right)) + 1;
             int diff_b = diff(node);
             if (diff_b == 2) {
                 int diff_a = diff(node->left);
@@ -84,7 +80,7 @@ class AVLTree {
             return;
         }
         insert(node->right, key);
-        node->height = std::max(height(node->left), height(node->right)) + 1;
+        node->height = std::max(Height(node->left), Height(node->right)) + 1;
         int diff_a = diff(node);
         if (diff_a == -2) {
             int diff_b = diff(node->right);
@@ -100,7 +96,7 @@ class AVLTree {
     Node* const WorkWithInorderSucessor(Node*& node) {
         if (node->left != nullptr) {
             Node* node_to_return = WorkWithInorderSucessor(node->left);
-            node->height = std::max(height(node->left), height(node->right)) + 1;
+            node->height = std::max(Height(node->left), Height(node->right)) + 1;
             int diff_a = diff(node);
             if (diff_a == -2) {
                 int diff_b = diff(node->right);
@@ -123,33 +119,30 @@ class AVLTree {
             return;
         }
         if (key == node->key) {
-            //попали в лист
             if (node->left == nullptr and node->right == nullptr) {
                 delete node;
                 node = nullptr;
                 return;
             }
-            //есть только правая ноде
             if (node->left == nullptr) {
                 Node* const node_right = node->right;
                 delete node;
                 node = node_right;
                 return;
             }
-            //есть только левая ноде
             if (node->right == nullptr) {
                 Node* const node_left = node->left;
                 delete node;
                 node = node_left;
                 return;
             }
-            //есть обе ноды и нужно как-то выкручиваться
+
             Node* node_returned = WorkWithInorderSucessor(node->right);
             node_returned->left = node->left;
             node_returned->right = node->right;
             delete node;
             node = node_returned;
-            node->height = std::max(height(node->left), height(node->right)) + 1;
+            node->height = std::max(Height(node->left), height(node->right)) + 1;
             int diff_b = diff(node);
             if (diff_b == 2) {
                 int diff_a = diff(node->left);
@@ -164,7 +157,7 @@ class AVLTree {
         }
         if (key < node->key) {
             remove(node->left, key);
-            node->height = std::max(height(node->left), height(node->right)) + 1;
+            node->height = std::max(Height(node->left), Height(node->right)) + 1;
             int diff_a = diff(node);
             if (diff_a == -2) {
                 int diff_b = diff(node->right);
@@ -178,7 +171,7 @@ class AVLTree {
             return;
         }
         remove(node->right, key);
-        node->height = std::max(height(node->left), height(node->right)) + 1;
+        node->height = std::max(Height(node->left), Height(node->right)) + 1;
         int diff_b = diff(node);
         if (diff_b == 2) {
             int diff_a = diff(node->left);
@@ -211,30 +204,35 @@ class AVLTree {
     }
 
 public:
-    bool contains(const Type& key) const {
-        return contains(root, key);
+    bool Contains(const Type& key) const {
+        return Contains(root_, key);
     }
 
-    void insert(const Type& key) {
-        insert(root, key);
+    void Insert(const Type& key) {
+        insert(root_, key);
     }
 
-    void print() {
-        print(root);
+    void Print() {
+        print(root_);
     }
-    void remove(const Type& key) {
-        remove(root, key);
+    void Remove(const Type& key) {
+        remove(root_, key);
+    }
+
+    void Clear() {
+        destroy(root_);
+        root_ = nullptr;
     }
 
     ~AVLTree() {
-        destroy(root);
+        destroy(root_);
     }
 
     class Iterator {
         std::stack<Node*> stack_of_nodes_;
 
     public:
-        Iterator(Node* node) {
+        explicit Iterator(Node* node) {
             while (node != nullptr) {
                 stack_of_nodes_.push(node);
                 node = node->left;
@@ -256,17 +254,17 @@ public:
             return *this;
         }
 
-        bool operator==(const Iterator& other) const{
+        bool operator==(const Iterator& other) const {
             return stack_of_nodes_ == other.stack_of_nodes_;
         }
 
-        bool operator!=(const Iterator& other) const{ 
+        bool operator!=(const Iterator& other) const {
             return !operator==(other);
         }
     };
 
     Iterator Begin() const {
-        return Iterator(root);
+        return Iterator(root_);
     }
 
     Iterator End() const {
