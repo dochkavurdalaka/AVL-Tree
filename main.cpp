@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iostream>
 #include <vector>
+#include <stack>
 using namespace std;
 
 template <class Type>
@@ -203,7 +204,7 @@ class AVLTree {
         if (node == nullptr) {
             return;
         }
-        
+
         print(node->left);
         std::cout << node->key << " ";
         print(node->right);
@@ -228,6 +229,49 @@ public:
     ~AVLTree() {
         destroy(root);
     }
+
+    class Iterator {
+        std::stack<Node*> stack_of_nodes_;
+
+    public:
+        Iterator(Node* node) {
+            while (node != nullptr) {
+                stack_of_nodes_.push(node);
+                node = node->left;
+            }
+        }
+
+        const Type& operator*() const {
+            return stack_of_nodes_.top()->key;
+        }
+
+        Iterator& operator++() {
+            Node* node = stack_of_nodes_.top();
+            stack_of_nodes_.pop();
+            node = node->right;
+            while (node != nullptr) {
+                stack_of_nodes_.push(node);
+                node = node->left;
+            }
+            return *this;
+        }
+
+        bool operator==(const Iterator& other) const{
+            return stack_of_nodes_ == other.stack_of_nodes_;
+        }
+
+        bool operator!=(const Iterator& other) const{ 
+            return !operator==(other);
+        }
+    };
+
+    Iterator Begin() const {
+        return Iterator(root);
+    }
+
+    Iterator End() const {
+        return Iterator(nullptr);
+    }
 };
 
 int main() {
@@ -242,31 +286,47 @@ int main() {
     tree.insert(2);
     tree.insert(3);
     tree.insert(1);
-    
+
+    for (auto it = tree.Begin(); it != tree.End(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << "\n";
+
     tree.remove(1);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(7);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(3);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(8);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(5);
-    tree.print(); std::cout << '\n';
-    //tree.remove(1);
-    //tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
+    // tree.remove(1);
+    // tree.print(); std::cout << '\n';
     tree.remove(9);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(2);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(2);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(6);
-    tree.print(); std::cout << '\n';
-    //tree.remove(7);
-    //tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
+    // tree.remove(7);
+    // tree.print(); std::cout << '\n';
     tree.remove(10);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
     tree.remove(4);
-    tree.print(); std::cout << '\n';
+    tree.print();
+    std::cout << '\n';
 }
